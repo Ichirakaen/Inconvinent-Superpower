@@ -67,39 +67,72 @@ function love.update(dt)
     
     if current_state == "game" then
     local isMoving=false
+    local moveX, moveY = 0,0
     
-    if love.keyboard.isDown("right","d") then
-        player.x=player.x+player.walk
-        player.anim=player.animations.right
-        isMoving=true
+    if love.keyboard.isDown("right", "d") then
+        moveX = moveX + 1
+        player.anim = player.animations.right
+        isMoving = true
+    end
+    if love.keyboard.isDown("left", "a") then
+        moveX = moveX - 1
+        player.anim = player.animations.left
+        isMoving = true
     end
 
-    if love.keyboard.isDown("up","w") then
-        player.y=player.y-player.walk
-        player.anim=player.animations.up
-        isMoving=true
+    -- Vertical movement
+    if love.keyboard.isDown("up", "w") then
+        moveY = moveY - 1
+        player.anim = player.animations.up
+        isMoving = true
     end
-
-    if love.keyboard.isDown("down","s") then
-        player.y=player.y+player.walk
-        player.anim=player.animations.down
-        isMoving=true
-    end
-
-    if love.keyboard.isDown("left","a") then
-        player.x=player.x-player.walk
-        player.anim=player.animations.left
-        isMoving=true
+    if love.keyboard.isDown("down", "s") then
+        moveY = moveY + 1
+        player.anim = player.animations.down
+        isMoving = true
     
     end
+     
+     if moveX ~= 0 and moveY ~= 0 then
+        moveX = moveX / math.sqrt(2)
+        moveY = moveY / math.sqrt(2)
+    end
+
+   
+    player.x = player.x + moveX * player.walk
+    player.y = player.y + moveY * player.walk
 
     if isMoving ==false then
         player.anim:gotoFrame(2)
     end
 
-
+    
     player.anim:update(dt)
     cam:lookAt(player.x, player.y)  
+
+    local w = love.graphics.getWidth()
+    local h = love.graphics.getHeight()
+    
+
+    if cam.x < w/2 then
+        cam.x = w/2
+    end
+
+    if cam.y < h/2 then
+        cam.y = h/2
+    end
+
+    local mapw = gamemap.width * gamemap.tilewidth
+    local maph= gamemap.height * gamemap.tileheight
+
+    if cam.x > (mapw-w/2) then
+        cam.x = (mapw-w/2)
+    end
+
+    if cam.y > (maph-h/2) then
+        cam.y = (maph-h/2)
+    end
+    
 end
 end
 
@@ -156,10 +189,14 @@ end
 
    
 function drawGame()   
-    cam:attach()
-    gamemap:draw()
-    player.anim:draw(player.spriteSheet,player.x,player.y,nil , 2)
-    cam:detach()
     love.graphics.setColor(1, 1, 1)
+    cam:attach()
+    gamemap:drawLayer(gamemap.layers["Background"])
+    gamemap:drawLayer(gamemap.layers["Tree"])
+    gamemap:drawLayer(gamemap.layers["Ice"])
+    gamemap:drawLayer(gamemap.layers["House"])
+    player.anim:draw(player.spriteSheet,player.x,player.y,nil,2,nil,25,25)
+    cam:detach()
+   
     
 end
