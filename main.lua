@@ -1,6 +1,8 @@
 _G.love = require ('love')
 Button_height = 64
 
+local current_state = "menu"
+
   local 
     function newbutton (text, fn)
         return{
@@ -17,9 +19,10 @@ Button_height = 64
 function love.load()
   
     font =  love.graphics.newFont(32)
-    table.insert(buttons, newbutton("Start Game",
-  function ()
-    print("Starting game")
+    table.insert(buttons, newbutton("Start Game", function()
+        
+        
+        current_state = "game"
     end))
   
     table.insert(buttons, newbutton("Settings", 
@@ -61,6 +64,8 @@ function love.load()
 end
 
 function love.update(dt)
+    
+    if current_state == "game" then
     local isMoving=false
     
     if love.keyboard.isDown("right","d") then
@@ -92,68 +97,69 @@ function love.update(dt)
         player.anim:gotoFrame(2)
     end
 
+
     player.anim:update(dt)
-
-    cam:lookAt(player.x,player.y)
-
+    cam:lookAt(player.x, player.y)  
+end
 end
 
 function love.draw()
+    if current_state == "menu" then
+        drawMenu()
+    elseif current_state == "game" then
+        drawGame()
+    end
+end
+function drawMenu()
     local ww = love.graphics.getWidth()
     local wh = love.graphics.getHeight()
 
-    local button_width = ww * (1/3)
+    local button_width = ww * (1 / 3)
     local margin = 16
-
-    local total_height = (Button_height + margin)* #buttons
+    local total_height = (Button_height + margin) * #buttons
+    local cursor_y = 0
 
     for i, button in ipairs(buttons) do
         button.last = button.now
 
+        local bx = (ww * 0.5) - (button_width * 0.5)
+        local by = (wh * 0.5) - (total_height * 0.5) + cursor_y
 
-        local bx =  (ww*0.5)-(button_width*0.5)
-        local by = (wh * 0.5)-(total_height * 0.5) +cursor_y
-
-        local color = {0.4, 0.4, 0.5, 1.0}
+        local color = { 0.4, 0.4, 0.5, 1.0 }
 
         local mx, my = love.mouse.getPosition()
 
-        local hot = mx>bx and mx<bx + button_width and my >by and my<by + Button_height
+        local hot = mx > bx and mx < bx + button_width and my > by and my < by + Button_height
 
         if hot then
-            color = {0.9,0.8,0.9,1.0}
+            color = { 0.9, 0.8, 0.9, 1.0 }
         end
 
         button.now = love.mouse.isDown(1)
         if button.now and not button.last and hot then
+            love.timer.sleep(0.15)
             button.fn()
         end
 
         love.graphics.setColor(unpack(color))
-        love.graphics.rectangle(
-        "fill",
-        bx,
-        by,
-        button_width,
-        Button_height
-        )
-      
-        love.graphics.setColor(0 , 0, 0, 1)
+        love.graphics.rectangle("fill", bx, by, button_width, Button_height)
+
+        love.graphics.setColor(0, 0, 0, 1)
 
         local textW = font:getWidth(button.text)
         local textH = font:getHeight(button.text)
-        love.graphics.print(
-            button.text,
-            font,
-            (ww*0.5) - textW * 0.5,
-            by + textH * 0.5
+        love.graphics.print(button.text, font, (ww * 0.5) - textW * 0.5, by + textH * 0.5)
 
-        )
-        cursor_y =  cursor_y + (Button_height + margin)
-
+        cursor_y = cursor_y + (Button_height + margin)
     end
+end
+
+   
+function drawGame()   
     cam:attach()
     gamemap:draw()
-    player.anim:draw(player.spriteSheet,player.x,player.y,nil , 6)
+    player.anim:draw(player.spriteSheet,player.x,player.y,nil , 2)
     cam:detach()
+    love.graphics.setColor(1, 1, 1)
+    
 end
