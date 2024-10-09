@@ -19,9 +19,8 @@ local current_state = "menu"
 function love.load()
   
     font =  love.graphics.newFont(32)
-    table.insert(buttons, newbutton("Start Game", function()
-        
-        
+    table.insert(buttons, newbutton("Start Game", 
+    function()
         current_state = "game"
     end))
   
@@ -45,7 +44,7 @@ function love.load()
     love.graphics.setDefaultFilter("nearest","nearest")
 
     sti = require 'libraries.sti'
-    gamemap = sti('Snowy Asset Pack/Map.lua')
+    gamemap = sti('Asset/Map.lua')
     player={}
     player.x=200
     player.y=200
@@ -60,7 +59,14 @@ function love.load()
     player.animations.left = anim8.newAnimation(player.grid('1-4',4), 0.2)
     player.animations.right = anim8.newAnimation(player.grid('1-4',2), 0.2)
     player.anim=player.animations.down
-    
+    slime = {}
+    slime.x = 200
+    slime.y= 200
+    slime.walk =6
+    slime.health = 100
+    slime.isAlive = true
+    slime.spriteSheet=love.graphics.newImage("Asset/demon_slime_FREE_v1.0_288x160_spritesheet.png")
+ 
 end
 
 function love.update(dt)
@@ -80,7 +86,7 @@ function love.update(dt)
         isMoving = true
     end
 
-    -- Vertical movement
+ 
     if love.keyboard.isDown("up", "w") then
         moveY = moveY - 1
         player.anim = player.animations.up
@@ -135,6 +141,7 @@ function love.update(dt)
     
 end
 end
+
 
 function love.draw()
     if current_state == "menu" then
@@ -196,7 +203,13 @@ function drawGame()
     gamemap:drawLayer(gamemap.layers["Ice"])
     gamemap:drawLayer(gamemap.layers["House"])
     player.anim:draw(player.spriteSheet,player.x,player.y,nil,2,nil,25,25)
+
+    if slime.isAlive then
+        love.graphics.draw(slime.spriteSheet, slime.x, slime.y)
+    end
     cam:detach()
-   
+   if slime.isAlive then
+    print("Health")
+   end
     
 end
